@@ -1,0 +1,8 @@
+reels/**/render/frames_*/
+reels/**/out/*_video.mp4
+reels/**/vo/out/*.mp3
+__pycache__/
+*.pyc
+node_modules/
+reels/**/audio/out/*.wav
+reels/**/out/preview/

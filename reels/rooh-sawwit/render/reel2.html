@@ -1,0 +1,80 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><link rel="stylesheet" href="common.css">
+<style>
+#stage{background:#08080a}
+.bg{background:radial-gradient(ellipse 70% 50% at 50% 42%,#141317 0%,#08080a 70%)}
+.redveil{background:radial-gradient(ellipse 80% 70% at 50% 50%,rgba(196,0,31,0) 35%,rgba(196,0,31,.55) 100%);opacity:0}
+.clock{position:absolute;left:0;right:0;top:27%;text-align:center;font-family:Bebas;font-size:520px;line-height:.9;letter-spacing:.02em;color:var(--cream);direction:ltr;font-variant-numeric:tabular-nums;text-shadow:0 0 60px rgba(239,232,216,.12)}
+.cs{position:absolute;left:0;right:0;top:51.5%;text-align:center;font-family:Grot;font-size:44px;color:#8a8478;letter-spacing:.2em;direction:ltr}
+.bar{position:absolute;left:88px;right:88px;top:56%;height:6px;background:#1c1b1f}
+.bar i{position:absolute;left:0;top:0;bottom:0;background:#bfa980;width:0}
+.bar b{position:absolute;top:-6px;width:2px;height:18px;background:#2a292e}
+.word{position:absolute;right:88px;left:88px;top:60%;text-align:right;font-size:150px;line-height:1.05;opacity:0;letter-spacing:-.01em}
+.word u{text-decoration:none;display:block;height:10px;width:0;background:var(--red2);margin-top:14px;margin-right:0}
+.stack{position:absolute;right:88px;top:73%;text-align:right;font-family:Tajawal;font-weight:700;font-size:40px;color:#6f6a62;line-height:1.55}
+.stack span{display:block;opacity:0}
+.final{position:absolute;right:88px;left:88px;top:24%;text-align:right;opacity:0}
+.final .l1{font-size:190px;line-height:1.05;color:#fff}
+.final .l1 b{color:var(--red2);font-weight:800}
+.final .l2{font-family:Cairo;font-weight:900;font-size:80px;line-height:1.4;color:var(--cream);margin-top:34px}
+.final .date{font-family:Bebas;font-size:190px;line-height:1;color:#fff;direction:ltr;text-align:right;margin-top:64px;opacity:0}
+.final .rule{height:10px;width:0;background:var(--red2);margin-top:14px}
+.final .cta{font-size:170px;line-height:1.05;margin-top:22px;opacity:0}
+.final .cta b{color:var(--red2);font-weight:800}
+.tag{position:absolute;left:88px;top:6.5%;font-family:Grot;font-size:26px;letter-spacing:.3em;color:rgba(255,255,255,.35);direction:ltr}
+.tag2{position:absolute;right:88px;top:6.5%;font-family:Tajawal;font-size:30px;letter-spacing:.12em;color:rgba(255,255,255,.45)}
+</style></head><body><div id="stage"></div>
+<script>
+const P=window.PARAMS||{}; const T=P.timeline; const S=document.getElementById('stage');
+const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x)); const ease=x=>1-Math.pow(1-clamp(x),3);
+function el(tag,cls,parent,html){const e=document.createElement(tag); if(cls)e.className=cls; if(html!=null)e.innerHTML=html; (parent||S).appendChild(e); return e;}
+el('div','layer bg'); const veil=el('div','layer redveil');
+const clockWrap=el('div','layer'); const clock=el('div','clock',clockWrap,'00:00'); const cs=el('div','cs',clockWrap,'.00');
+const bar=el('div','bar',clockWrap); const fill=el('i',null,bar); for(let i=1;i<12;i++){const b=el('b',null,bar); b.style.left=(i/12*100)+'%';}
+const word=el('div','word',clockWrap); const wt=el('span',null,word,''); const wu=el('u',null,word);
+const stack=el('div','stack',clockWrap); const stackEls=T.ticks.map(k=>el('span',null,stack,k.display));
+el('div','tag',clockWrap,'#ROOH_SAWWIT'); el('div','tag2',clockWrap,'انتخابات الكنيست · 27/10/2026');
+const fin=el('div','final'); const l1=el('div','l1',fin); const l2=el('div','l2',fin); const date=el('div','date',fin,'27/10/2026'); const rule=el('div','rule',fin); const cta=el('div','cta',fin,'روح <b>صوّت.</b>');
+const W=T.final.words; // estimated or Polly word marks for the final VO
+const l1w=T.final.display_1.split(' ').map(w=>el('span','w',l1,w)); const l2w=T.final.display_2.split(' ').map(w=>el('span','w',l2,w));
+l1w[0].innerHTML='<b>12</b>';
+const flash=el('div','layer flash'), red=el('div','layer redflash'), scan=el('div','layer scan');
+const pad=n=>String(n).padStart(2,'0');
+window.seek=function(t){
+  flash.style.opacity=0; red.style.opacity=0; const CE=T.clock_end, FS=T.final_start;
+  const clockOn = t < FS-0.15; clockWrap.style.opacity = clockOn? 1 : 0; fin.style.opacity = t>=FS-0.15 ? 1 : 0;
+  if (clockOn){
+    const ct = Math.min(t, CE); const sec=Math.floor(ct), hund=Math.floor((ct-sec)*100);
+    clock.textContent='00:'+pad(sec); cs.textContent='.'+pad(t>=CE?0:hund);
+    const since = ct-sec; const punch = t<CE ? 1+0.07*Math.exp(-since*22) : 1;
+    let shake = t<CE ? Math.exp(-since*18)*4 : 0;
+    const tick = T.ticks.find(k=>Math.abs(k.at-sec)<0.001 && since<0.01);
+    fill.style.width=(clamp(ct/12)*100)+'%';
+    // words on ticks
+    let cur=null; for(const k of T.ticks){ if(t>=k.at) cur=k; }
+    if (cur && t<CE){ const a=clamp((t-cur.at)/0.16); wt.textContent=cur.display; word.style.opacity=a; word.style.transform=`translateY(${(1-ease(a))*40}px) scale(${1.08-0.08*ease(a)})`; wu.style.width=(ease((t-cur.at-0.05)/0.45)*100)+'%';
+      const idx=T.ticks.indexOf(cur); const nxt=T.ticks[idx+1]; const life = (nxt? nxt.at : CE) - cur.at; const u=(t-cur.at)/life; word.style.opacity = a*(u>0.8? (1-u)/0.2 : 1);
+      if (t-cur.at<0.09){ red.style.opacity=0.5*(1-(t-cur.at)/0.09); shake+=12*(1-(t-cur.at)/0.09); }
+    } else word.style.opacity=0;
+    stackEls.forEach((e,i)=>{ const k=T.ticks[i]; e.style.opacity = t>=k.at+0.55 ? 0.9*clamp((t-k.at-0.55)/0.3) : 0; e.style.transform=`translateY(${(1-clamp((t-k.at-0.55)/0.3))*10}px)`; });
+    // escalation: red veil + heartbeat pulse from 8s, digits go red in the last second, hundredths blur
+    const esc=clamp((t-8)/4); veil.style.opacity=esc*0.9*(0.75+0.25*Math.sin(t*9));
+    clock.style.color = t>=CE ? '#ff2a3c' : (t>11 ? '#ffd8cf' : '#efe8d8'); cs.style.filter = `blur(${esc*3}px)`;
+    clock.style.transform=`scale(${punch}) translate(${Math.sin(t*191)*shake}px,${Math.cos(t*167)*shake}px)`;
+    clock.style.letterSpacing = (0.02 + 0.06*esc*(1-clamp((t-CE)/0.2)))+'em';
+    if (t>=CE && t<CE+0.1){ flash.style.opacity=1-(t-CE)/0.1; }
+    if (t>=CE){ const s=(t-CE); clockWrap.style.transform=`scale(${1+0.06*Math.exp(-s*6)}) translate(${Math.sin(t*211)*18*Math.exp(-s*5)}px,${Math.cos(t*173)*18*Math.exp(-s*5)}px)`; clockWrap.style.filter = `contrast(${1+0.6*Math.exp(-s*4)})`; stack.style.opacity = 1-clamp(s/0.25); bar.style.opacity=1-clamp(s/0.25); }
+    else { clockWrap.style.transform=''; clockWrap.style.filter=''; stack.style.opacity=1; bar.style.opacity=1; }
+  } else {
+    const cue=i=> W[i]? W[i].t : FS+T.final.vo_dur;
+    l1w.forEach((w,i)=>{ const a=clamp((t-cue(i))/0.2); w.style.opacity=a; w.style.transform=`translateY(${(1-ease(a))*.3}em)`; w.style.filter=`blur(${(1-a)*8}px)`; });
+    const off=l1w.length; l2w.forEach((w,i)=>{ const a=clamp((t-cue(off+i))/0.18); w.style.opacity=a; w.style.transform=`translateY(${(1-ease(a))*.3}em)`; w.style.filter=`blur(${(1-a)*6}px)`; });
+    const dT = cue(off+l2w.length); const a=clamp((t-dT)/0.35); date.style.opacity=a; date.style.transform=`translateX(${(1-ease(a))*40}px)`; rule.style.width=(ease((t-dT-0.2)/0.5)*100)+'%';
+    const cT = W.length>=2? W[W.length-2].t : dT+1.2; const c=clamp((t-cT)/0.3); cta.style.opacity=c; cta.style.transform=`scale(${1.12-0.12*ease(c)})`; cta.style.filter=`blur(${(1-c)*10}px)`;
+    if (t>=cT && t<cT+0.09) red.style.opacity=0.55*(1-(t-cT)/0.09);
+    const shake = t>=cT && t<cT+0.35 ? (1-(t-cT)/0.35)*9 : 0; fin.style.transform=`translate(${Math.sin(t*173)*shake}px,${Math.cos(t*151)*shake}px)`;
+    const hb = 0.5+0.5*Math.pow(Math.max(0,Math.sin((t-FS)*2*Math.PI/1.05)),8); veil.style.opacity=0.35*hb;
+  }
+  scan.style.opacity=0.35+0.15*Math.sin(t*3);
+};
+window.READY=document.fonts.ready.then(()=>true);
+</script></body></html>

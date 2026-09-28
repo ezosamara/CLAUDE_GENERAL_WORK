@@ -1,0 +1,21 @@
+@font-face{font-family:Changa;src:url(../assets/fonts/Changa-800.ttf);font-weight:800}
+@font-face{font-family:Tajawal;src:url(../assets/fonts/Tajawal-700.ttf);font-weight:700}
+@font-face{font-family:Tajawal;src:url(../assets/fonts/Tajawal-400.ttf);font-weight:400}
+@font-face{font-family:Cairo;src:url(../assets/fonts/Cairo-900.ttf);font-weight:900}
+@font-face{font-family:Bebas;src:url(../assets/fonts/Bebas.ttf)}
+@font-face{font-family:Grot;src:url(../assets/fonts/SpaceGrotesk-700.ttf);font-weight:700}
+:root{--red:#c4001f;--red2:#ff2a3c;--cream:#efe8d8;--ink:#f4f2ee;--W:1080px;--H:1920px}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:var(--W);height:var(--H);overflow:hidden;background:#050506}
+#stage{position:relative;width:var(--W);height:var(--H);overflow:hidden;background:#050506;direction:rtl;font-family:Changa,Tajawal,sans-serif;color:var(--ink)}
+.layer{position:absolute;inset:0}
+.plate{position:absolute;inset:-8% -6% -4% -6%;background-size:cover;background-position:center;will-change:transform;filter:saturate(.85) contrast(1.08)}
+.vignette{background:radial-gradient(ellipse 75% 62% at 50% 45%,rgba(0,0,0,0) 40%,rgba(0,0,0,.72) 100%)}
+.shade{background:linear-gradient(to top,rgba(4,4,6,1) 0%,rgba(4,4,6,.97) 26%,rgba(4,4,6,.75) 40%,rgba(4,4,6,0) 60%)}
+.flash{background:#fff;opacity:0;mix-blend-mode:screen}
+.redflash{background:var(--red);opacity:0;mix-blend-mode:screen}
+.w{display:inline-block;opacity:0;transform:translateY(.28em);filter:blur(6px);transition:none;margin-inline-end:.14em;will-change:transform,opacity,filter}
+.w.on{opacity:1;transform:none;filter:blur(0)}
+.w.dim{opacity:.5}
+.scan{background:repeating-linear-gradient(0deg,rgba(255,255,255,.025) 0 2px,rgba(0,0,0,0) 2px 5px);mix-blend-mode:overlay;opacity:.6}
+.safe-note{position:absolute;inset:0;pointer-events:none}

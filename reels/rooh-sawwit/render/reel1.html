@@ -1,0 +1,101 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><link rel="stylesheet" href="common.css">
+<style>
+#title{background:var(--cream);color:#151311;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0}
+#title .k{font-family:Tajawal;font-weight:400;font-size:30px;letter-spacing:.35em;color:#6b6257;margin-bottom:38px}
+#title .big{font-size:420px;line-height:.95;letter-spacing:-.02em}
+#title .rule{width:220px;height:3px;background:#151311;margin:34px 0 22px}
+#title .s{font-family:Tajawal;font-weight:400;font-size:34px;color:#6b6257}
+#title .paper{position:absolute;inset:0;background:radial-gradient(ellipse at 30% 20%,rgba(255,255,255,.55),rgba(0,0,0,0) 60%),radial-gradient(ellipse at 80% 90%,rgba(90,70,40,.18),rgba(0,0,0,0) 55%);mix-blend-mode:multiply}
+.line{position:absolute;right:88px;left:88px;bottom:21%;font-family:Tajawal;font-weight:700;font-size:76px;line-height:1.45;text-align:right;text-shadow:0 2px 24px rgba(0,0,0,.9)}
+.line .w.on{color:#fff}
+.line .w.hot{color:#fff}
+.sign{position:absolute;right:88px;bottom:12.5%;font-size:150px;line-height:1;opacity:0;letter-spacing:-.01em}
+.sign small{display:block;font-family:Tajawal;font-weight:400;font-size:30px;color:#a7a39b;margin-top:10px;letter-spacing:.1em}
+.sign .dash{color:var(--red2);margin-inline-end:.15em}
+#black{background:#050506}
+#black .hd{position:absolute;right:88px;left:88px;top:31%;word-spacing:-.05em;font-family:Cairo;font-weight:900;font-size:98px;line-height:1.35;color:var(--red2);text-align:right}
+#black .date{position:absolute;right:88px;top:52%;font-family:Bebas;font-size:212px;line-height:1;color:#fff;letter-spacing:.02em;direction:ltr;opacity:0}
+#black .rule{position:absolute;right:88px;top:64.5%;height:10px;width:0;background:var(--red2)}
+#black .cta{position:absolute;right:88px;top:66.5%;font-size:170px;line-height:1.05;opacity:0}
+#black .cta b{color:var(--red2);font-weight:800}
+#black .sub{position:absolute;right:92px;top:77.5%;font-family:Tajawal;font-size:34px;color:#8f8b84;letter-spacing:.08em;opacity:0}
+.feed #title .big{font-size:300px}
+.feed .line{bottom:25%;font-size:66px}
+.feed .sign{bottom:9%;font-size:118px}
+.feed .sign small{font-size:26px}
+.feed #black .hd{top:16%;font-size:84px}
+.feed #black .date{top:40%;font-size:176px}
+.feed #black .rule{top:55%}
+.feed #black .cta{top:58%;font-size:150px}
+.feed #black .sub{top:74%}
+.tag{position:absolute;left:88px;top:6.5%;font-family:Grot;font-size:26px;letter-spacing:.3em;color:rgba(255,255,255,.35);direction:ltr}
+</style></head><body><div id="stage"></div>
+<script>
+const P = window.PARAMS || {}; const TL = P.timeline; const H = P.H || 1920;
+const S = document.getElementById('stage');
+document.documentElement.style.setProperty('--H', H + 'px'); if (H < 1600) S.classList.add('feed');
+const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x)); const ease=x=>1-Math.pow(1-clamp(x),3); const ei=x=>clamp(x)*clamp(x);
+const els = {}; const scenes = TL.scenes;
+function el(tag, cls, parent, html){const e=document.createElement(tag); if(cls) e.className=cls; if(html!=null) e.innerHTML=html; (parent||S).appendChild(e); return e;}
+function words(container, arr){ return arr.map((w,i)=>{const s=el('span','w',container,w.value); return s;}); }
+// ---------- build ----------
+for (const sc of scenes) {
+  const root = el('div','layer', S); root.style.opacity=0; els[sc.id]={root, sc};
+  if (sc.scene==='titlecard') {
+    root.id='title'; el('div','paper',root); el('div','k',root,'إعلان'); el('div','big',root,'شكراً'); el('div','rule',root); el('div','s',root,'رسالة شكر');
+  } else if (sc.scene==='black') {
+    root.id='black';
+    els[sc.id].hd = el('div','hd',root); els[sc.id].hw = words(els[sc.id].hd, sc.display.split(' ').map(v=>({value:v})));
+    els[sc.id].date = el('div','date',root,'27/10/2026'); els[sc.id].rule=el('div','rule',root);
+    els[sc.id].cta = el('div','cta',root,'روح <b>صوّت.</b>'); els[sc.id].sub=el('div','sub',root,'حملة غير حزبية · انتخابات الكنيست');
+    el('div','tag',root,'#ROOH_SAWWIT');
+  } else {
+    const plate = el('div','plate',root); plate.style.backgroundImage=`url(../assets/plates/${sc.scene}.jpg)`; els[sc.id].plate=plate;
+    el('div','layer vignette',root); el('div','layer shade',root);
+    const line = el('div','line',root); els[sc.id].line=line; els[sc.id].lw = words(line, sc.display.split(' ').map(v=>({value:v})));
+    if (sc.sign){ const sg=el('div','sign',root,`<span class="dash">—</span>المستفيد<small>مع خالص الشكر</small>`); els[sc.id].sign=sg; }
+  }
+}
+const flash=el('div','layer flash',S), redflash=el('div','layer redflash',S), scan=el('div','layer scan',S);
+const kb = {couch:[1.0,1.09,0,-14], corridor:[1.14,1.0,0,0], street:[1.0,1.1,18,0], silhouette:[1.0,1.12,0,10], closeup:[1.02,1.16,0,0]};
+// ---------- seek ----------
+window.seek = function(t){
+  let hot=null; flash.style.opacity=0; redflash.style.opacity=0;
+  for (const sc of scenes){
+    const E=els[sc.id]; const on = t>=sc.start && t<sc.end; E.root.style.opacity = on?1:0; if(!on) continue;
+    const u=(t-sc.start)/(sc.end-sc.start);
+    if (sc.scene==='titlecard'){
+      const flick = 0.96+0.04*Math.sin(t*61)+0.02*Math.sin(t*23); E.root.style.filter=`brightness(${flick})`;
+      E.root.style.transform=`scale(${1+0.02*u})`;
+      if (t>sc.end-0.08) { E.root.style.filter='brightness(.2) contrast(2)'; }
+    } else if (sc.scene==='black'){
+      const cue = i=> sc.words[i]? sc.words[i].t : sc.end;
+      E.hw.forEach((w,i)=>{ const a=clamp((t-cue(i))/0.22); w.style.opacity=a; w.style.transform=`translateY(${(1-ease(a))*.3}em)`; w.style.filter=`blur(${(1-a)*6}px)`; });
+      const dT = cue(3); const a=clamp((t-dT)/0.35); E.date.style.opacity=a; E.date.style.transform=`translateX(${(1-ease(a))*40}px) scale(${.92+.08*ease(a)})`;
+      const rT = dT+0.25; E.rule.style.width = (ease((t-rT)/0.5)*(P.W-176))+'px';
+      const cT = sc.words.length>=2? sc.words[sc.words.length-2].t : dT+1.2; const c=clamp((t-cT)/0.3);
+      E.cta.style.opacity=c; E.cta.style.transform=`scale(${1.12-0.12*ease(c)})`; E.cta.style.filter=`blur(${(1-c)*10}px)`;
+      E.sub.style.opacity=clamp((t-cT-0.35)/0.4);
+      if (t>=cT && t<cT+0.09) redflash.style.opacity=0.55*(1-(t-cT)/0.09);
+      const shake = t>=cT && t<cT+0.35 ? (1-(t-cT)/0.35)*9 : 0; E.root.style.transform=`translate(${Math.sin(t*173)*shake}px,${Math.cos(t*151)*shake}px)`;
+      if (t<sc.start+0.45){ E.root.style.opacity = 1; }
+    } else {
+      const k=kb[sc.scene]; const s=k[0]+(k[1]-k[0])*u; const dx=k[2]*u, dy=k[3]*u; const jx=Math.sin(t*37)*1.2+Math.sin(t*11)*0.8, jy=Math.cos(t*29)*1.2;
+      E.plate.style.transform=`translate(${dx+jx}px,${dy+jy}px) scale(${s})`;
+      const fin = clamp((t-sc.start)/0.5), fout = clamp((sc.end-t)/0.35); E.root.style.opacity = Math.min(fin,fout);
+      E.lw.forEach((w,i)=>{ const cw=sc.words[i]||sc.words[sc.words.length-1]; const a=clamp((t-cw.t)/0.18); w.style.opacity = a; w.style.transform=`translateY(${(1-ease(a))*.28}em)`; w.style.filter=`blur(${(1-a)*6}px)`; w.style.color = '#fff'; });
+      if (sc.sign){ const rt = sc.words[sc.words.length-1].t; const a=clamp((t-rt)/0.25);
+        E.sign.style.opacity=a; E.sign.style.transform=`translateY(${(1-ease(a))*30}px)`;
+        if (t>=rt && t<rt+0.07){ redflash.style.opacity=0.7; E.plate.style.filter='invert(1) saturate(0)'; } else E.plate.style.filter='';
+        const shake = t>=rt && t<rt+0.4 ? (1-(t-rt)/0.4)*10 : 0; E.root.style.transform=`translate(${Math.sin(t*181)*shake}px,${Math.cos(t*143)*shake}px)`;
+        E.line.style.opacity = 1 - 0.35*a;
+      }
+      if (sc.scene==='corridor'){ const rw = sc.words[2]? sc.words[2].t : sc.vo_start+1; if (t>=rw && t<rw+0.6) redflash.style.opacity = 0.32*(1-(t-rw)/0.6); }
+    }
+  }
+  // burn cut from title to couch: 2-frame white pop
+  const tc = scenes[0].end; if (t>=tc && t<tc+0.07) flash.style.opacity = 0.9*(1-(t-tc)/0.07);
+  scan.style.opacity = 0.35+0.15*Math.sin(t*3);
+};
+window.READY = document.fonts.ready.then(()=>true);
+</script></body></html>
